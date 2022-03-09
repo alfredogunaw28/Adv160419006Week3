@@ -1,22 +1,55 @@
 package com.jitusolution.adv160419006week4.viewmodel
 
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.jitusolution.adv160419006week4.model.Student
 
-class ListViewModel: ViewModel()  {
+class ListViewModel(application:Application): AndroidViewModel(application)  {
     val studentsLD = MutableLiveData<List<Student>>()
     val studentLoadErrorLD = MutableLiveData<Boolean>()
     val loadingLD = MutableLiveData<Boolean>()
 
-    fun refresh() {
-        val student1 = Student("08-7107794","Melva","2/20/2022","779-701-4100","http://dummyimage.com/175x100.png/dddddd/000000")
-        val student2 = Student("27-1378539","Billy","6/2/2021","841-291-4577","http://dummyimage.com/198x100.png/cc0000/ffffff")
-        val student3 = Student("66-1980602","Friedrich","6/12/2021","964-237-9311","http://dummyimage.com/220x100.png/ff4444/ffffff")
+    private val TAG = "volleyTag"
+    private var queue:RequestQueue? = null
 
-        val studentList:ArrayList<Student> = arrayListOf<Student>(student1, student2, student3)
-        studentsLD.value = studentList
-        studentLoadErrorLD.value = false
+    fun refresh() {
         loadingLD.value = true
+        studentLoadErrorLD.value = false
+
+        queue = Volley.newRequestQueue(getApplication())
+        val url = "http://adv.jitusolution.com/student.php"
+
+        val stringRequest = StringRequest(
+            Request.Method.GET, url,
+            {
+                val sType = object : TypeToken<List<Student>>() { }.type
+                val result = Gson().fromJson<List<Student>>(it, sType)
+                studentsLD.value = result
+                loadingLD.value = false
+
+                Log.d("showvoley", result.toString())
+                loadingLD.value = false
+                Log.d("showvoley", it)
+            },
+            {
+                Log.d("showvoley", it.toString())
+                studentLoadErrorLD.value = false
+                loadingLD.value = false
+            })
+        stringRequest.tag = TAG
+        queue?.add(stringRequest)
+    }
+    override fun onCleared() {
+        super.onCleared()
+        queue?.cancelAll(TAG)
     }
 }
