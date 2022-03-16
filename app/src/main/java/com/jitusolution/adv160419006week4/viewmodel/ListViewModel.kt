@@ -26,7 +26,7 @@ class ListViewModel(application:Application): AndroidViewModel(application)  {
         studentLoadErrorLD.value = false
 
         queue = Volley.newRequestQueue(getApplication())
-        val url = "http://adv.jitusolution.com/student.php"
+        val url = "http://adv.jitusolution.com/student.phpid=[student id]"
 
         val stringRequest = StringRequest(
             Request.Method.GET, url,
@@ -52,4 +52,8 @@ class ListViewModel(application:Application): AndroidViewModel(application)  {
         super.onCleared()
         queue?.cancelAll(TAG)
     }
+}
+
+object response {
+
 }
